@@ -21,10 +21,10 @@ import com.google.android.gms.ads.AdView
 @Composable
 fun AdFooterView(modifier: Modifier = Modifier) {
     Column(
-        modifier = modifier
+            modifier = modifier
             .fillMaxWidth()
             .background(MaterialTheme.colorScheme.surface)
-            .padding(top = 10.dp, bottom = 8.dp),
+            .padding(top = 6.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
@@ -36,8 +36,8 @@ fun AdFooterView(modifier: Modifier = Modifier) {
         AndroidView(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(88.dp)
-                .padding(horizontal = 16.dp, vertical = 6.dp),
+                .height(50.dp)
+                .padding(horizontal = 16.dp),
             factory = { context ->
                 AdView(context).apply {
                     setAdSize(AdSize.BANNER)
