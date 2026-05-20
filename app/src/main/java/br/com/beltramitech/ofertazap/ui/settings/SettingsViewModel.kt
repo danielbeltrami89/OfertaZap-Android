@@ -12,7 +12,10 @@ class SettingsViewModel(
     private val settings: OfertaZapSettings
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(
-        SettingsUiState(headline = settings.messageHeadline)
+        SettingsUiState(
+            headline = settings.messageHeadline,
+            footer = settings.messageFooter
+        )
     )
     val uiState: StateFlow<SettingsUiState> = _uiState
 
@@ -24,25 +27,38 @@ class SettingsViewModel(
     fun clearHeadline() {
         updateHeadline("")
     }
+
+    fun updateFooter(value: String) {
+        settings.messageFooter = value
+        _uiState.update { it.copy(footer = value) }
+    }
+
+    fun clearFooter() {
+        updateFooter("")
+    }
 }
 
 data class SettingsUiState(
-    val headline: String
+    val headline: String,
+    val footer: String
 ) {
-    val isClearButtonEnabled: Boolean
-        get() = headline.trim().isNotEmpty()
-
     val previewLines: List<String>
         get() {
             val trimmedHeadline = headline.trim()
+            val trimmedFooter = footer.trim()
             return buildList {
                 if (trimmedHeadline.isNotEmpty()) {
                     add("🔥 $trimmedHeadline 🔥")
+                    add("")
                 }
                 add("✨ NOME DO PRODUTO")
                 add("✅ por: R$ 48,00")
                 add("🚚 Confira no Mercado Livre")
                 add("🛒 https://meli.la/exemplo")
+                if (trimmedFooter.isNotEmpty()) {
+                    add("")
+                    add("_${trimmedFooter}_")
+                }
             }
         }
 }

@@ -29,12 +29,14 @@ class ShareViewModel(
                 messageBuilder.buildMessage(
                     item = item,
                     shareUrl = url,
-                    headline = settings.normalizedHeadline
+                    headline = settings.normalizedHeadline,
+                    footer = settings.normalizedFooter
                 )
             } catch (_: Exception) {
                 messageBuilder.buildFallbackMessage(
                     url = url,
-                    headline = settings.normalizedHeadline
+                    headline = settings.normalizedHeadline,
+                    footer = settings.normalizedFooter
                 )
             }
 

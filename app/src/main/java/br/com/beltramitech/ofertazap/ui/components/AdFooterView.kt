@@ -24,7 +24,7 @@ fun AdFooterView(modifier: Modifier = Modifier) {
         modifier = modifier
             .fillMaxWidth()
             .background(MaterialTheme.colorScheme.surface)
-            .padding(top = 10.dp, bottom = 8.dp),
+            .padding(top = 6.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
@@ -36,8 +36,7 @@ fun AdFooterView(modifier: Modifier = Modifier) {
         AndroidView(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(88.dp)
-                .padding(horizontal = 16.dp, vertical = 6.dp),
+                .height(50.dp),
             factory = { context ->
                 AdView(context).apply {
                     setAdSize(AdSize.BANNER)
