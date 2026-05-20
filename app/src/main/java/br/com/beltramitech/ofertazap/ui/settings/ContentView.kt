@@ -2,6 +2,7 @@ package br.com.beltramitech.ofertazap.ui.settings
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -9,6 +10,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -75,7 +77,7 @@ private fun SettingsSection(
             title = "Topo da mensagem",
             value = uiState.headline,
             placeholder = "Ex: Oferta encontrada",
-            helper = "Se ficar vazio, a primeira linha da mensagem não será exibida ao compartilhar.",
+            helper = "Vazio não aparece.",
             onValueChange = onHeadlineChange,
             onClear = onHeadlineClear
         )
@@ -84,7 +86,7 @@ private fun SettingsSection(
             title = "Fim da mensagem",
             value = uiState.footer,
             placeholder = "Ex: Aproveite antes que acabe",
-            helper = "Se ficar vazio, a última linha não será exibida. No WhatsApp ela aparece em itálico.",
+            helper = "Vazio não aparece. WhatsApp usa itálico.",
             onValueChange = onFooterChange,
             onClear = onFooterClear
         )
@@ -123,8 +125,20 @@ private fun SettingsTextField(
             }
         )
 
+        SettingsTip(helper)
+    }
+}
+
+@Composable
+private fun SettingsTip(text: String) {
+    Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+        Icon(
+            imageVector = Icons.Default.Info,
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.onSurfaceVariant
+        )
         Text(
-            text = helper,
+            text = text,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             style = MaterialTheme.typography.bodySmall
         )
