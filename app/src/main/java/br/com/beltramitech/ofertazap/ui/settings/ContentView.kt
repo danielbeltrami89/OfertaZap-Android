@@ -1,42 +1,59 @@
 package br.com.beltramitech.ofertazap.ui.settings
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Info
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import br.com.beltramitech.ofertazap.ui.components.AdFooterView
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ContentView(viewModel: SettingsViewModel) {
     val uiState by viewModel.uiState.collectAsState()
+    val focusManager = LocalFocusManager.current
 
     Scaffold(
-        topBar = {
-            TopAppBar(title = { Text("OfertaZap") })
-        },
+        containerColor = MaterialTheme.colorScheme.background,
         bottomBar = {
             AdFooterView()
         }
@@ -44,22 +61,79 @@ fun ContentView(viewModel: SettingsViewModel) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
+                .background(MaterialTheme.colorScheme.background)
+                .pointerInput(Unit) {
+                    detectTapGestures(onTap = { focusManager.clearFocus() })
+                }
                 .padding(paddingValues)
                 .verticalScroll(rememberScrollState())
-                .padding(20.dp),
-            verticalArrangement = Arrangement.spacedBy(18.dp)
+                .padding(horizontal = 20.dp, vertical = 26.dp),
+            verticalArrangement = Arrangement.spacedBy(20.dp)
         ) {
+            HeaderSummary()
+
             SettingsSection(
                 uiState = uiState,
                 onHeadlineChange = viewModel::updateHeadline,
                 onHeadlineClear = viewModel::clearHeadline,
                 onFooterChange = viewModel::updateFooter,
-                onFooterClear = viewModel::clearFooter
+                onFooterClear = viewModel::clearFooter,
+                onDone = { focusManager.clearFocus() }
             )
 
-            HorizontalDivider()
-
             PreviewSection(lines = uiState.previewLines)
+        }
+    }
+}
+
+@Composable
+private fun HeaderSummary() {
+    Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
+        Text(
+            text = "OfertaZap",
+            color = MaterialTheme.colorScheme.onBackground,
+            fontWeight = FontWeight.Bold,
+            style = MaterialTheme.typography.displaySmall
+        )
+
+        Card(
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
+            shape = RoundedCornerShape(24.dp)
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(18.dp),
+                horizontalArrangement = Arrangement.spacedBy(14.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Surface(
+                    modifier = Modifier.size(44.dp),
+                    color = MaterialTheme.colorScheme.primary,
+                    shape = CircleShape
+                ) {
+                    Icon(
+                        modifier = Modifier.padding(10.dp),
+                        imageVector = Icons.Default.Info,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onPrimary
+                    )
+                }
+
+                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                    Text(
+                        text = "Mensagem pronta para grupos",
+                        color = MaterialTheme.colorScheme.onSurface,
+                        fontWeight = FontWeight.SemiBold,
+                        style = MaterialTheme.typography.titleMedium
+                    )
+                    Text(
+                        text = "Configure as frases fixas e revise a prévia antes de compartilhar.",
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        style = MaterialTheme.typography.bodySmall
+                    )
+                }
+            }
         }
     }
 }
@@ -70,25 +144,28 @@ private fun SettingsSection(
     onHeadlineChange: (String) -> Unit,
     onHeadlineClear: () -> Unit,
     onFooterChange: (String) -> Unit,
-    onFooterClear: () -> Unit
+    onFooterClear: () -> Unit,
+    onDone: () -> Unit
 ) {
-    Column(verticalArrangement = Arrangement.spacedBy(18.dp)) {
+    Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
         SettingsTextField(
             title = "Topo da mensagem",
             value = uiState.headline,
             placeholder = "Ex: Oferta encontrada",
-            helper = "Vazio não aparece.",
+            helper = "Vazio não aparece na mensagem.",
             onValueChange = onHeadlineChange,
-            onClear = onHeadlineClear
+            onClear = onHeadlineClear,
+            onDone = onDone
         )
 
         SettingsTextField(
             title = "Fim da mensagem",
             value = uiState.footer,
             placeholder = "Ex: Aproveite antes que acabe",
-            helper = "Vazio não aparece. WhatsApp usa itálico.",
+            helper = "No WhatsApp, essa frase aparece em itálico.",
             onValueChange = onFooterChange,
-            onClear = onFooterClear
+            onClear = onFooterClear,
+            onDone = onDone
         )
     }
 }
@@ -100,39 +177,81 @@ private fun SettingsTextField(
     placeholder: String,
     helper: String,
     onValueChange: (String) -> Unit,
-    onClear: () -> Unit
+    onClear: () -> Unit,
+    onDone: () -> Unit
 ) {
-    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-        Text(text = title, style = MaterialTheme.typography.titleMedium)
+    Card(
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
+        shape = RoundedCornerShape(22.dp)
+    ) {
+        Column(
+            modifier = Modifier.padding(18.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(
+                    modifier = Modifier.size(18.dp),
+                    imageVector = Icons.Default.Info,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                    text = title,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    fontWeight = FontWeight.SemiBold,
+                    style = MaterialTheme.typography.titleMedium
+                )
+            }
 
-        OutlinedTextField(
-            modifier = Modifier.fillMaxWidth(),
-            value = value,
-            onValueChange = onValueChange,
-            label = { Text(placeholder) },
-            minLines = 1,
-            maxLines = 2,
-            singleLine = false,
-            trailingIcon = {
-                if (value.trim().isNotEmpty()) {
-                    IconButton(onClick = onClear) {
-                        Icon(
-                            imageVector = Icons.Default.Close,
-                            contentDescription = "Limpar campo"
-                        )
+            OutlinedTextField(
+                modifier = Modifier.fillMaxWidth(),
+                value = value,
+                onValueChange = onValueChange,
+                label = { Text(placeholder) },
+                minLines = 1,
+                maxLines = 2,
+                singleLine = false,
+                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
+                keyboardActions = KeyboardActions(onDone = { onDone() }),
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedTextColor = MaterialTheme.colorScheme.onSurface,
+                    unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
+                    focusedContainerColor = MaterialTheme.colorScheme.surface,
+                    unfocusedContainerColor = MaterialTheme.colorScheme.surface,
+                    focusedBorderColor = MaterialTheme.colorScheme.primary,
+                    unfocusedBorderColor = Color.Transparent,
+                    focusedLabelColor = MaterialTheme.colorScheme.primary,
+                    unfocusedLabelColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                    cursorColor = MaterialTheme.colorScheme.primary
+                ),
+                shape = RoundedCornerShape(14.dp),
+                trailingIcon = {
+                    if (value.trim().isNotEmpty()) {
+                        IconButton(onClick = onClear) {
+                            Icon(
+                                imageVector = Icons.Default.Close,
+                                contentDescription = "Limpar campo",
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
                     }
                 }
-            }
-        )
+            )
 
-        SettingsTip(helper)
+            SettingsTip(helper)
+        }
     }
 }
 
 @Composable
 private fun SettingsTip(text: String) {
-    Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+    Row(
+        horizontalArrangement = Arrangement.spacedBy(6.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
         Icon(
+            modifier = Modifier.size(16.dp),
             imageVector = Icons.Default.Info,
             contentDescription = null,
             tint = MaterialTheme.colorScheme.onSurfaceVariant
@@ -147,25 +266,60 @@ private fun SettingsTip(text: String) {
 
 @Composable
 private fun PreviewSection(lines: List<String>) {
-    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-        Text(
-            text = "Prévia",
-            style = MaterialTheme.typography.titleMedium
-        )
-
-        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            lines.forEach { line ->
-                Text(
-                    text = line,
-                    color = if (line.startsWith("🛒")) {
-                        MaterialTheme.colorScheme.onSurfaceVariant
-                    } else {
-                        MaterialTheme.colorScheme.onSurface
-                    },
-                    maxLines = if (line.startsWith("🛒")) 1 else Int.MAX_VALUE,
-                    overflow = TextOverflow.Ellipsis,
-                    style = MaterialTheme.typography.bodyMedium
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        shape = RoundedCornerShape(24.dp)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .border(
+                    width = 1.dp,
+                    color = MaterialTheme.colorScheme.surfaceVariant,
+                    shape = RoundedCornerShape(24.dp)
                 )
+                .padding(18.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "Prévia",
+                    color = MaterialTheme.colorScheme.onSurface,
+                    fontWeight = FontWeight.SemiBold,
+                    style = MaterialTheme.typography.titleMedium
+                )
+
+                Text(
+                    modifier = Modifier
+                        .clip(CircleShape)
+                        .background(Color(0xFFE8F8EE))
+                        .padding(horizontal = 10.dp, vertical = 5.dp),
+                    text = "WhatsApp",
+                    color = Color(0xFF14813D),
+                    textAlign = TextAlign.Center,
+                    style = MaterialTheme.typography.labelSmall
+                )
+            }
+
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                lines.forEach { line ->
+                    Text(
+                        text = line,
+                        color = if (line.startsWith("🛒")) {
+                            MaterialTheme.colorScheme.onSurfaceVariant
+                        } else {
+                            MaterialTheme.colorScheme.onSurface
+                        },
+                        maxLines = if (line.startsWith("🛒")) 1 else Int.MAX_VALUE,
+                        overflow = TextOverflow.Ellipsis,
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                }
             }
         }
     }

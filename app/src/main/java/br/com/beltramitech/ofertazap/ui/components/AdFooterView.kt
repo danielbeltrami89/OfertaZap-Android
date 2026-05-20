@@ -21,7 +21,7 @@ import com.google.android.gms.ads.AdView
 @Composable
 fun AdFooterView(modifier: Modifier = Modifier) {
     Column(
-            modifier = modifier
+        modifier = modifier
             .fillMaxWidth()
             .background(MaterialTheme.colorScheme.surface)
             .padding(top = 6.dp),
@@ -36,8 +36,7 @@ fun AdFooterView(modifier: Modifier = Modifier) {
         AndroidView(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(50.dp)
-                .padding(horizontal = 16.dp),
+                .height(50.dp),
             factory = { context ->
                 AdView(context).apply {
                     setAdSize(AdSize.BANNER)
