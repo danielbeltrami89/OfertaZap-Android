@@ -16,10 +16,22 @@ class OfertaZapSettings(context: Context) {
                 .apply()
         }
 
+    var messageFooter: String
+        get() = preferences.getString(FOOTER_KEY, "") ?: ""
+        set(value) {
+            preferences.edit()
+                .putString(FOOTER_KEY, value.trim())
+                .apply()
+        }
+
     val normalizedHeadline: String?
         get() = messageHeadline.trim().ifEmpty { null }
 
+    val normalizedFooter: String?
+        get() = messageFooter.trim().ifEmpty { null }
+
     private companion object {
         const val HEADLINE_KEY = "messageHeadline"
+        const val FOOTER_KEY = "messageFooter"
     }
 }

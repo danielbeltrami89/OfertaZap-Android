@@ -2,19 +2,21 @@ package br.com.beltramitech.ofertazap.ui.settings
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -48,7 +50,9 @@ fun ContentView(viewModel: SettingsViewModel) {
             SettingsSection(
                 uiState = uiState,
                 onHeadlineChange = viewModel::updateHeadline,
-                onClear = viewModel::clearHeadline
+                onHeadlineClear = viewModel::clearHeadline,
+                onFooterChange = viewModel::updateFooter,
+                onFooterClear = viewModel::clearFooter
             )
 
             HorizontalDivider()
@@ -62,34 +66,65 @@ fun ContentView(viewModel: SettingsViewModel) {
 private fun SettingsSection(
     uiState: SettingsUiState,
     onHeadlineChange: (String) -> Unit,
+    onHeadlineClear: () -> Unit,
+    onFooterChange: (String) -> Unit,
+    onFooterClear: () -> Unit
+) {
+    Column(verticalArrangement = Arrangement.spacedBy(18.dp)) {
+        SettingsTextField(
+            title = "Topo da mensagem",
+            value = uiState.headline,
+            placeholder = "Ex: Oferta encontrada",
+            helper = "Se ficar vazio, a primeira linha da mensagem não será exibida ao compartilhar.",
+            onValueChange = onHeadlineChange,
+            onClear = onHeadlineClear
+        )
+
+        SettingsTextField(
+            title = "Fim da mensagem",
+            value = uiState.footer,
+            placeholder = "Ex: Aproveite antes que acabe",
+            helper = "Se ficar vazio, a última linha não será exibida. No WhatsApp ela aparece em itálico.",
+            onValueChange = onFooterChange,
+            onClear = onFooterClear
+        )
+    }
+}
+
+@Composable
+private fun SettingsTextField(
+    title: String,
+    value: String,
+    placeholder: String,
+    helper: String,
+    onValueChange: (String) -> Unit,
     onClear: () -> Unit
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-        Text(
-            text = "Topo da mensagem",
-            style = MaterialTheme.typography.titleMedium
-        )
+        Text(text = title, style = MaterialTheme.typography.titleMedium)
 
         OutlinedTextField(
             modifier = Modifier.fillMaxWidth(),
-            value = uiState.headline,
-            onValueChange = onHeadlineChange,
-            label = { Text("Ex: Oferta encontrada") },
+            value = value,
+            onValueChange = onValueChange,
+            label = { Text(placeholder) },
             minLines = 1,
             maxLines = 2,
-            singleLine = false
+            singleLine = false,
+            trailingIcon = {
+                if (value.trim().isNotEmpty()) {
+                    IconButton(onClick = onClear) {
+                        Icon(
+                            imageVector = Icons.Default.Close,
+                            contentDescription = "Limpar campo"
+                        )
+                    }
+                }
+            }
         )
 
-        TextButton(
-            onClick = onClear,
-            enabled = uiState.isClearButtonEnabled,
-            contentPadding = PaddingValues(horizontal = 0.dp)
-        ) {
-            Text("Limpar texto")
-        }
-
         Text(
-            text = "Se ficar vazio, a primeira linha da mensagem não será exibida ao compartilhar.",
+            text = helper,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             style = MaterialTheme.typography.bodySmall
         )
