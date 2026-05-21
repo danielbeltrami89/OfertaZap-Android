@@ -1,5 +1,9 @@
 package br.com.beltramitech.ofertazap
 
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -18,8 +22,25 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             OfertaZapTheme {
-                ContentView(viewModel = viewModel)
+                ContentView(
+                    viewModel = viewModel,
+                    onShare = ::shareMessage
+                )
             }
         }
+    }
+
+    private fun shareMessage(message: String) {
+        copyMessage(message)
+        val intent = Intent(Intent.ACTION_SEND).apply {
+            type = "text/plain"
+            putExtra(Intent.EXTRA_TEXT, message)
+        }
+        startActivity(Intent.createChooser(intent, "Compartilhar oferta"))
+    }
+
+    private fun copyMessage(message: String) {
+        val clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+        clipboard.setPrimaryClip(ClipData.newPlainText("OfertaZap", message))
     }
 }
