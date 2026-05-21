@@ -35,6 +35,9 @@
                 <data android:host="meli.la" />
                 <data android:host="www.mercadolivre.com.br" />
                 <data android:host="produto.mercadolivre.com.br" />
+                <data android:host="s.shopee.com.br" />
+                <data android:host="shopee.com.br" />
+                <data android:host="www.shopee.com.br" />
             </intent-filter>
         </activity>
 

@@ -37,18 +37,19 @@ class ShareActivity : ComponentActivity() {
     }
 
     private fun handleIncomingIntent(intent: Intent) {
-        val url = when (intent.action) {
+        val sharedText = when (intent.action) {
             Intent.ACTION_VIEW -> intent.data?.toString()
             Intent.ACTION_SEND -> intent.getStringExtra(Intent.EXTRA_TEXT)
             else -> null
-        }?.let(sharedUrlExtractor::firstUrl)
+        }
+        val url = sharedText?.let(sharedUrlExtractor::firstUrl)
 
         if (url == null) {
             finish()
             return
         }
 
-        viewModel.loadOffer(url)
+        viewModel.loadOffer(url, sharedText)
     }
 
     private fun shareMessage(message: String) {

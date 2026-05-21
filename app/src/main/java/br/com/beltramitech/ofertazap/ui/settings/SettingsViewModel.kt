@@ -53,8 +53,8 @@ data class SettingsUiState(
                 }
                 add("✨ NOME DO PRODUTO")
                 add("✅ por: R$ 48,00")
-                add("🚚 Confira no Mercado Livre")
-                add("🛒 https://meli.la/exemplo")
+                add("🚚 Confira na [plataforma]")
+                add("🛒 https://link-da-oferta")
                 if (trimmedFooter.isNotEmpty()) {
                     add("")
                     add("_${trimmedFooter}_")
