@@ -38,6 +38,15 @@
                 <data android:host="s.shopee.com.br" />
                 <data android:host="shopee.com.br" />
                 <data android:host="www.shopee.com.br" />
+                <data android:host="amzn.to" />
+                <data android:host="a.co" />
+                <data android:host="amazon.com.br" />
+                <data android:host="www.amazon.com.br" />
+                <data android:host="magazineluiza.onelink.me" />
+                <data android:host="magazineluiza.com.br" />
+                <data android:host="www.magazineluiza.com.br" />
+                <data android:host="magalu.com" />
+                <data android:host="www.magalu.com" />
             </intent-filter>
         </activity>
 

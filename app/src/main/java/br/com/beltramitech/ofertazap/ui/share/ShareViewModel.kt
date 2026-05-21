@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import br.com.beltramitech.ofertazap.data.AffiliateService
 import br.com.beltramitech.ofertazap.data.MercadoLivreService
 import br.com.beltramitech.ofertazap.data.OfertaZapSettings
 import br.com.beltramitech.ofertazap.data.ShopeeService
@@ -18,6 +19,7 @@ class ShareViewModel(
     private val settings: OfertaZapSettings,
     private val mercadoLivreService: MercadoLivreService = MercadoLivreService(),
     private val shopeeService: ShopeeService = ShopeeService(),
+    private val affiliateService: AffiliateService = AffiliateService(),
     private val messageBuilder: OfferMessageBuilder = OfferMessageBuilder()
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(ShareUiState())
@@ -30,6 +32,8 @@ class ShareViewModel(
             val message = when (ProductPlatform.fromUrl(url)) {
                 ProductPlatform.MercadoLivre -> makeMercadoLivreMessage(url)
                 ProductPlatform.Shopee -> makeShopeeMessage(url, sharedText)
+                ProductPlatform.Amazon -> makeAffiliateMessage(url, sharedText, ProductPlatform.Amazon)
+                ProductPlatform.MagazineLuiza -> makeAffiliateMessage(url, sharedText, ProductPlatform.MagazineLuiza)
                 ProductPlatform.Unsupported -> messageBuilder.buildFallbackMessage(
                     url = url,
                     platformName = ProductPlatform.Unsupported.displayName,
@@ -50,6 +54,22 @@ class ShareViewModel(
 
     fun updateEditableMessage(value: String) {
         _uiState.update { it.copy(editableMessage = value) }
+    }
+
+    suspend fun makeMessageFromPastedLink(url: String): String {
+        val platform = ProductPlatform.fromUrl(url)
+        return when (platform) {
+            ProductPlatform.MercadoLivre -> makeMercadoLivreMessage(url)
+            ProductPlatform.Shopee -> makeShopeeMessage(url, null)
+            ProductPlatform.Amazon,
+            ProductPlatform.MagazineLuiza -> makeAffiliateMessage(url, null, platform)
+            ProductPlatform.Unsupported -> messageBuilder.buildFallbackMessage(
+                url = url,
+                platformName = platform.displayName,
+                headline = settings.normalizedHeadline,
+                footer = settings.normalizedFooter
+            )
+        }
     }
 
     private suspend fun makeMercadoLivreMessage(url: String): String {
@@ -86,6 +106,34 @@ class ShareViewModel(
             messageBuilder.buildFallbackMessage(
                 url = url,
                 platformName = ProductPlatform.Shopee.displayName,
+                headline = settings.normalizedHeadline,
+                footer = settings.normalizedFooter
+            )
+        }
+    }
+
+    private suspend fun makeAffiliateMessage(
+        url: String,
+        sharedText: String?,
+        platform: ProductPlatform
+    ): String {
+        return try {
+            val item = affiliateService.fetchItem(
+                sharedUrl = url,
+                platform = platform,
+                sharedText = sharedText
+            )
+            messageBuilder.buildMessage(
+                item = item,
+                platform = platform,
+                shareUrl = url,
+                headline = settings.normalizedHeadline,
+                footer = settings.normalizedFooter
+            )
+        } catch (_: Exception) {
+            messageBuilder.buildFallbackMessage(
+                url = url,
+                platformName = platform.displayName,
                 headline = settings.normalizedHeadline,
                 footer = settings.normalizedFooter
             )

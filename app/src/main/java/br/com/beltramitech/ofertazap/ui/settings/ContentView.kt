@@ -19,8 +19,12 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.automirrored.filled.Send
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -37,20 +41,28 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import br.com.beltramitech.ofertazap.ui.components.AdFooterView
+import br.com.beltramitech.ofertazap.ui.share.ValueCheckWarning
 
 @Composable
-fun ContentView(viewModel: SettingsViewModel) {
+fun ContentView(
+    viewModel: SettingsViewModel,
+    onShare: (String) -> Unit
+) {
     val uiState by viewModel.uiState.collectAsState()
     val focusManager = LocalFocusManager.current
+    val clipboardManager = LocalClipboardManager.current
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
@@ -72,6 +84,22 @@ fun ContentView(viewModel: SettingsViewModel) {
         ) {
             HeaderSummary()
 
+            AffiliateShareSection(
+                uiState = uiState,
+                onLinkChange = viewModel::updateAffiliateLink,
+                onLinkClear = viewModel::clearAffiliateLink,
+                onPaste = {
+                    viewModel.updateAffiliateLink(clipboardManager.getText()?.text.orEmpty())
+                },
+                onPrepare = {
+                    focusManager.clearFocus()
+                    viewModel.prepareAffiliateMessage()
+                },
+                onShare = onShare,
+                onCopy = { clipboardManager.setText(AnnotatedString(it)) },
+                onDone = { focusManager.clearFocus() }
+            )
+
             SettingsSection(
                 uiState = uiState,
                 onHeadlineChange = viewModel::updateHeadline,
@@ -82,6 +110,147 @@ fun ContentView(viewModel: SettingsViewModel) {
             )
 
             PreviewSection(lines = uiState.previewLines)
+        }
+    }
+}
+
+@Composable
+private fun AffiliateShareSection(
+    uiState: SettingsUiState,
+    onLinkChange: (String) -> Unit,
+    onLinkClear: () -> Unit,
+    onPaste: () -> Unit,
+    onPrepare: () -> Unit,
+    onShare: (String) -> Unit,
+    onCopy: (String) -> Unit,
+    onDone: () -> Unit
+) {
+    Card(
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
+        shape = RoundedCornerShape(22.dp)
+    ) {
+        Column(
+            modifier = Modifier.padding(18.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(
+                    modifier = Modifier.size(18.dp),
+                    imageVector = Icons.Default.Info,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                    text = "Compartilhar por link",
+                    color = MaterialTheme.colorScheme.onSurface,
+                    fontWeight = FontWeight.SemiBold,
+                    style = MaterialTheme.typography.titleMedium
+                )
+            }
+
+            OutlinedTextField(
+                modifier = Modifier.fillMaxWidth(),
+                value = uiState.affiliateLink,
+                onValueChange = onLinkChange,
+                label = { Text("Cole o link da oferta") },
+                minLines = 1,
+                maxLines = 3,
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Uri,
+                    imeAction = ImeAction.Done
+                ),
+                keyboardActions = KeyboardActions(onDone = { onDone() }),
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedTextColor = MaterialTheme.colorScheme.onSurface,
+                    unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
+                    focusedContainerColor = MaterialTheme.colorScheme.surface,
+                    unfocusedContainerColor = MaterialTheme.colorScheme.surface,
+                    focusedBorderColor = MaterialTheme.colorScheme.primary,
+                    unfocusedBorderColor = Color.Transparent,
+                    focusedLabelColor = MaterialTheme.colorScheme.primary,
+                    unfocusedLabelColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                    cursorColor = MaterialTheme.colorScheme.primary
+                ),
+                shape = RoundedCornerShape(14.dp),
+                trailingIcon = {
+                    if (uiState.affiliateLink.trim().isNotEmpty()) {
+                        IconButton(onClick = onLinkClear) {
+                            Icon(
+                                imageVector = Icons.Default.Close,
+                                contentDescription = "Limpar link",
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    }
+                }
+            )
+
+            Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                Button(
+                    modifier = Modifier.weight(1f),
+                    onClick = onPaste,
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.surface,
+                        contentColor = MaterialTheme.colorScheme.onSurface
+                    ),
+                    shape = RoundedCornerShape(14.dp)
+                ) {
+                    Text("Colar")
+                }
+
+                Button(
+                    modifier = Modifier.weight(1f),
+                    onClick = onPrepare,
+                    enabled = !uiState.isAffiliateLoading,
+                    shape = RoundedCornerShape(14.dp)
+                ) {
+                    if (uiState.isAffiliateLoading) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(18.dp),
+                            strokeWidth = 2.dp,
+                            color = MaterialTheme.colorScheme.onPrimary
+                        )
+                    } else {
+                        Text("Preparar")
+                    }
+                }
+            }
+
+            uiState.affiliateError?.let { SettingsTip(it) }
+
+            if (uiState.affiliateMessage.isNotBlank()) {
+                MessagePreview(lines = uiState.affiliateMessage.lines())
+                ValueCheckWarning()
+
+                Button(
+                    modifier = Modifier.fillMaxWidth(),
+                    onClick = { onShare(uiState.affiliateMessage) },
+                    shape = RoundedCornerShape(14.dp)
+                ) {
+                    Icon(
+                        modifier = Modifier.size(18.dp),
+                        imageVector = Icons.AutoMirrored.Filled.Send,
+                        contentDescription = null
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text("Compartilhar mensagem")
+                }
+
+                Button(
+                    modifier = Modifier.fillMaxWidth(),
+                    onClick = { onCopy(uiState.affiliateMessage) },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.surface,
+                        contentColor = MaterialTheme.colorScheme.onSurface
+                    ),
+                    shape = RoundedCornerShape(14.dp)
+                ) {
+                    Text("Copiar texto")
+                }
+            }
+
+            SettingsTip("Amazon e Magazine Luiza podem ser colados aqui.")
         }
     }
 }
@@ -320,6 +489,41 @@ private fun PreviewSection(lines: List<String>) {
                         style = MaterialTheme.typography.bodyMedium
                     )
                 }
+            }
+        }
+    }
+}
+
+@Composable
+private fun MessagePreview(lines: List<String>) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        shape = RoundedCornerShape(18.dp)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .border(
+                    width = 1.dp,
+                    color = MaterialTheme.colorScheme.surfaceVariant,
+                    shape = RoundedCornerShape(18.dp)
+                )
+                .padding(14.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            lines.forEach { line ->
+                Text(
+                    text = line,
+                    color = if (line.startsWith("🛒")) {
+                        MaterialTheme.colorScheme.onSurfaceVariant
+                    } else {
+                        MaterialTheme.colorScheme.onSurface
+                    },
+                    maxLines = if (line.startsWith("🛒")) 1 else Int.MAX_VALUE,
+                    overflow = TextOverflow.Ellipsis,
+                    style = MaterialTheme.typography.bodyMedium
+                )
             }
         }
     }
