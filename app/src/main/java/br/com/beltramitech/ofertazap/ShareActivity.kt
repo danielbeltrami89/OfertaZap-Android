@@ -1,4 +1,4 @@
-package br.com.beltramitech.ofertazap
+package dev.beltramitech.ofertazap
 
 import android.content.ClipData
 import android.content.ClipboardManager
@@ -8,11 +8,11 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
-import br.com.beltramitech.ofertazap.domain.SharedUrlExtractor
-import br.com.beltramitech.ofertazap.ui.share.ShareScreen
-import br.com.beltramitech.ofertazap.ui.share.ShareViewModel
-import br.com.beltramitech.ofertazap.ui.share.ShareViewModelFactory
-import br.com.beltramitech.ofertazap.ui.theme.OfertaZapTheme
+import dev.beltramitech.ofertazap.domain.SharedUrlExtractor
+import dev.beltramitech.ofertazap.ui.share.ShareScreen
+import dev.beltramitech.ofertazap.ui.share.ShareViewModel
+import dev.beltramitech.ofertazap.ui.share.ShareViewModelFactory
+import dev.beltramitech.ofertazap.ui.theme.OfertaZapTheme
 
 class ShareActivity : ComponentActivity() {
     private val viewModel: ShareViewModel by viewModels {

@@ -1,4 +1,4 @@
-package br.com.beltramitech.ofertazap.ui.components
+package dev.beltramitech.ofertazap.ui.components
 
 import android.view.ViewGroup
 import androidx.compose.foundation.background
@@ -9,7 +9,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
-import br.com.beltramitech.ofertazap.BuildConfig
+import dev.beltramitech.ofertazap.BuildConfig
 import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.AdSize
 import com.google.android.gms.ads.AdView

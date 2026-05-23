@@ -1,4 +1,4 @@
-package br.com.beltramitech.ofertazap.ui.theme
+package dev.beltramitech.ofertazap.ui.theme
 
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.lightColorScheme

@@ -1,8 +1,8 @@
-package br.com.beltramitech.ofertazap.domain
+package dev.beltramitech.ofertazap.domain
 
-import br.com.beltramitech.ofertazap.data.MercadoLivreItem
-import br.com.beltramitech.ofertazap.data.AffiliateItem
-import br.com.beltramitech.ofertazap.data.ShopeeItem
+import dev.beltramitech.ofertazap.data.MercadoLivreItem
+import dev.beltramitech.ofertazap.data.AffiliateItem
+import dev.beltramitech.ofertazap.data.ShopeeItem
 import java.math.BigDecimal
 import java.text.NumberFormat
 import java.util.Locale

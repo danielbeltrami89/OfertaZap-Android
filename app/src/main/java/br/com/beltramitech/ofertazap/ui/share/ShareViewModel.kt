@@ -1,15 +1,15 @@
-package br.com.beltramitech.ofertazap.ui.share
+package dev.beltramitech.ofertazap.ui.share
 
 import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import br.com.beltramitech.ofertazap.data.AffiliateService
-import br.com.beltramitech.ofertazap.data.MercadoLivreService
-import br.com.beltramitech.ofertazap.data.OfertaZapSettings
-import br.com.beltramitech.ofertazap.data.ShopeeService
-import br.com.beltramitech.ofertazap.domain.OfferMessageBuilder
-import br.com.beltramitech.ofertazap.domain.ProductPlatform
+import dev.beltramitech.ofertazap.data.AffiliateService
+import dev.beltramitech.ofertazap.data.MercadoLivreService
+import dev.beltramitech.ofertazap.data.OfertaZapSettings
+import dev.beltramitech.ofertazap.data.ShopeeService
+import dev.beltramitech.ofertazap.domain.OfferMessageBuilder
+import dev.beltramitech.ofertazap.domain.ProductPlatform
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update

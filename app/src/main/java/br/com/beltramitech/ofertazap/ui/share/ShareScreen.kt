@@ -1,4 +1,4 @@
-package br.com.beltramitech.ofertazap.ui.share
+package dev.beltramitech.ofertazap.ui.share
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -48,7 +48,7 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
-import br.com.beltramitech.ofertazap.ui.components.AdFooterView
+import dev.beltramitech.ofertazap.ui.components.AdFooterView
 
 @Composable
 fun ShareScreen(

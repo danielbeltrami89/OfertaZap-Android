@@ -1,4 +1,4 @@
-package br.com.beltramitech.ofertazap
+package dev.beltramitech.ofertazap
 
 import android.content.ClipData
 import android.content.ClipboardManager
@@ -8,10 +8,10 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
-import br.com.beltramitech.ofertazap.ui.settings.ContentView
-import br.com.beltramitech.ofertazap.ui.settings.SettingsViewModel
-import br.com.beltramitech.ofertazap.ui.settings.SettingsViewModelFactory
-import br.com.beltramitech.ofertazap.ui.theme.OfertaZapTheme
+import dev.beltramitech.ofertazap.ui.settings.ContentView
+import dev.beltramitech.ofertazap.ui.settings.SettingsViewModel
+import dev.beltramitech.ofertazap.ui.settings.SettingsViewModelFactory
+import dev.beltramitech.ofertazap.ui.theme.OfertaZapTheme
 
 class MainActivity : ComponentActivity() {
     private val viewModel: SettingsViewModel by viewModels {

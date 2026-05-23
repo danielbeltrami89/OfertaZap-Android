@@ -1,4 +1,4 @@
-package br.com.beltramitech.ofertazap
+package dev.beltramitech.ofertazap
 
 import android.app.Application
 import com.google.android.gms.ads.MobileAds

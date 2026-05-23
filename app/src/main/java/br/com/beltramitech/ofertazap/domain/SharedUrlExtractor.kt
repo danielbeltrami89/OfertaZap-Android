@@ -1,4 +1,4 @@
-package br.com.beltramitech.ofertazap.domain
+package dev.beltramitech.ofertazap.domain
 
 import android.util.Patterns
 

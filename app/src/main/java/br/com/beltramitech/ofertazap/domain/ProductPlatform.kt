@@ -1,4 +1,4 @@
-package br.com.beltramitech.ofertazap.domain
+package dev.beltramitech.ofertazap.domain
 
 enum class ProductPlatform(val displayName: String) {
     MercadoLivre("Mercado Livre"),
