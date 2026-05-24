@@ -1,6 +1,6 @@
-package br.com.beltramitech.ofertazap.data
+package dev.beltramitech.ofertazap.data
 
-import br.com.beltramitech.ofertazap.domain.ProductPlatform
+import dev.beltramitech.ofertazap.domain.ProductPlatform
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient

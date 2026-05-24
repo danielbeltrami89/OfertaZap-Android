@@ -1,4 +1,4 @@
-package br.com.beltramitech.ofertazap.data
+package dev.beltramitech.ofertazap.data
 
 import java.math.BigDecimal
 

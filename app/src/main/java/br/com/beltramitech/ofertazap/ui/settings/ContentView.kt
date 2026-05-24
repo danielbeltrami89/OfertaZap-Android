@@ -1,4 +1,4 @@
-package br.com.beltramitech.ofertazap.ui.settings
+package dev.beltramitech.ofertazap.ui.settings
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -52,8 +52,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import br.com.beltramitech.ofertazap.ui.components.AdFooterView
-import br.com.beltramitech.ofertazap.ui.share.ValueCheckWarning
+import dev.beltramitech.ofertazap.ui.components.AdFooterView
+import dev.beltramitech.ofertazap.ui.share.ValueCheckWarning
 
 @Composable
 fun ContentView(

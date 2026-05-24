@@ -5,11 +5,11 @@ plugins {
 }
 
 android {
-    namespace = "br.com.beltramitech.ofertazap"
+    namespace = "dev.beltramitech.ofertazap"
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "br.com.beltramitech.ofertazap"
+        applicationId = "dev.beltramitech.ofertazap"
         minSdk = 26
         targetSdk = 35
         versionCode = 1
