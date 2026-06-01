@@ -8,6 +8,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
+import dev.beltramitech.ofertazap.data.AnalyticsTracker
 import dev.beltramitech.ofertazap.domain.SharedUrlExtractor
 import dev.beltramitech.ofertazap.ui.share.ShareScreen
 import dev.beltramitech.ofertazap.ui.share.ShareViewModel
@@ -19,16 +20,23 @@ class ShareActivity : ComponentActivity() {
         ShareViewModelFactory(applicationContext)
     }
     private val sharedUrlExtractor = SharedUrlExtractor()
+    private lateinit var analyticsTracker: AnalyticsTracker
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        analyticsTracker = AnalyticsTracker(applicationContext)
+        analyticsTracker.logScreenView(AnalyticsTracker.SCREEN_SHARE)
         handleIncomingIntent(intent)
 
         setContent {
             OfertaZapTheme {
                 ShareScreen(
                     viewModel = viewModel,
-                    onClose = ::finish,
+                    analyticsTracker = analyticsTracker,
+                    onClose = {
+                        analyticsTracker.logClick("share_close", AnalyticsTracker.SCREEN_SHARE)
+                        finish()
+                    },
                     onShare = ::shareMessage,
                     onCopy = ::copyMessage
                 )
@@ -49,10 +57,12 @@ class ShareActivity : ComponentActivity() {
             return
         }
 
+        analyticsTracker.logImpression("incoming_share_link", AnalyticsTracker.SCREEN_SHARE)
         viewModel.loadOffer(url, sharedText)
     }
 
     private fun shareMessage(message: String) {
+        analyticsTracker.logClick("share_send_message", AnalyticsTracker.SCREEN_SHARE)
         copyMessage(message)
         val intent = Intent(Intent.ACTION_SEND).apply {
             type = "text/plain"
@@ -63,6 +73,7 @@ class ShareActivity : ComponentActivity() {
     }
 
     private fun copyMessage(message: String) {
+        analyticsTracker.logClick("share_copy_message", AnalyticsTracker.SCREEN_SHARE)
         val clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
         clipboard.setPrimaryClip(ClipData.newPlainText("OfertaZap", message))
     }
