@@ -33,7 +33,7 @@ class MercadoLivreService(
                 ?: throw MercadoLivreServiceError.InvalidApiResponse
 
             try {
-                return@withContext parseApiItem(body)
+                return@withContext mergeApiItem(parseApiItem(body), htmlFallbackItem)
             } catch (_: Exception) {
                 return@withContext htmlFallbackItem ?: throw MercadoLivreServiceError.InvalidApiResponse
             }
@@ -65,12 +65,32 @@ class MercadoLivreService(
         )
     }
 
+    private fun mergeApiItem(apiItem: MercadoLivreItem, htmlItem: MercadoLivreItem?): MercadoLivreItem {
+        if (htmlItem == null) return apiItem
+
+        val finalOriginalPrice = when {
+            htmlItem.originalPrice != null -> htmlItem.originalPrice
+            htmlItem.price != null && apiItem.price != null && apiItem.price > htmlItem.price -> apiItem.price
+            else -> apiItem.originalPrice
+        }
+
+        return MercadoLivreItem(
+            id = apiItem.id,
+            title = apiItem.title.ifBlank { htmlItem.title },
+            price = htmlItem.price ?: apiItem.price,
+            originalPrice = finalOriginalPrice,
+            permalink = htmlItem.permalink
+        )
+    }
+
     private fun extractItemFromHtml(rawHtml: String, finalUrl: String): MercadoLivreItem? {
         val html = normalizeHtml(rawHtml)
         val id = extractProductIdFromHtml(html) ?: extractImageIdFromHtml(html) ?: "MERCADOLIVRE_SOCIAL"
         val hasProductId = id.startsWith("MLB")
-        val productHtml = if (hasProductId) htmlSegment(id, html) ?: html else html
-        val title = extractTitle(productHtml) ?: extractTitle(html) ?: return null
+        val title = extractTitle(html) ?: return null
+        val productHtml: String = htmlSegment(id, title, html)
+            ?: (if (hasProductId) htmlSegment(id, html) else null)
+            ?: html
         val price = extractCurrentPrice(productHtml) ?: extractCurrentPrice(html)
         val originalPrice = extractOriginalPrice(productHtml) ?: extractOriginalPrice(html)
         val permalink = extractProductUrlFromHtml(html, id)
@@ -105,6 +125,36 @@ class MercadoLivreService(
         return html.substring(start, end)
     }
 
+    private fun htmlSegment(id: String, title: String, html: String): String? {
+        val candidates = listOf(title, decodeHtmlText(title), cleanTitle(title))
+            .map { it.trim() }
+            .filter { it.isNotBlank() }
+            .distinct()
+
+        for (candidate in candidates) {
+            var searchStart = 0
+            while (searchStart < html.length) {
+                val index = html.indexOf(candidate, startIndex = searchStart, ignoreCase = true)
+                if (index < 0) break
+
+                val start = (index - 1_500).coerceAtLeast(0)
+                val end = (index + candidate.length + 8_000).coerceAtMost(html.length)
+                val segment = html.substring(start, end)
+
+                if (
+                    segment.contains("poly-component__title", ignoreCase = true) &&
+                    segment.contains("andes-money-amount", ignoreCase = true)
+                ) {
+                    return segment
+                }
+
+                searchStart = index + candidate.length
+            }
+        }
+
+        return null
+    }
+
     private fun extractTitle(text: String): String? {
         val patterns = listOf(
             """\"title\"\s*:\s*\{\"text\"\s*:\s*\"([^\"]+)\"""",
@@ -120,8 +170,15 @@ class MercadoLivreService(
     }
 
     private fun extractCurrentPrice(text: String): BigDecimal? {
+        extractAriaPrice(text, "Agora:")?.let { return it }
+
         val patterns = listOf(
             """\"current_price\"\s*:\s*\{[^}]*\"value\"\s*:\s*([0-9]+(?:\.[0-9]+)?)""",
+            """\"price_to_pay\"\s*:\s*\{[^}]*\"amount\"\s*:\s*"?([0-9]+(?:\.[0-9]+)?)"?""",
+            """\"priceToPay\"\s*:\s*\{[^}]*\"amount\"\s*:\s*"?([0-9]+(?:\.[0-9]+)?)"?""",
+            """\"sale_price\"\s*:\s*\{[^}]*\"amount\"\s*:\s*"?([0-9]+(?:\.[0-9]+)?)"?""",
+            """\"discount_price\"\s*:\s*\{[^}]*\"amount\"\s*:\s*"?([0-9]+(?:\.[0-9]+)?)"?""",
+            """\"final_price\"\s*:\s*\{[^}]*\"amount\"\s*:\s*"?([0-9]+(?:\.[0-9]+)?)"?""",
             """\"price\"\s*:\s*\{[^}]*\"amount\"\s*:\s*([0-9]+(?:\.[0-9]+)?)""",
             """<meta\s+property=["']product:price:amount["']\s+content=["']([^"']+)["']""",
             """<meta\s+content=["']([^"']+)["']\s+property=["']product:price:amount["']""",
@@ -134,6 +191,8 @@ class MercadoLivreService(
     }
 
     private fun extractOriginalPrice(text: String): BigDecimal? {
+        extractAriaPrice(text, "Antes:")?.let { return it }
+
         val patterns = listOf(
             """\"previous_price\"\s*:\s*\{[^}]*\"value\"\s*:\s*([0-9]+(?:\.[0-9]+)?)""",
             """\"original_price\"\s*:\s*([0-9]+(?:\.[0-9]+)?)""",
@@ -142,6 +201,20 @@ class MercadoLivreService(
         )
 
         return extractDecimal(text, patterns)
+    }
+
+    private fun extractAriaPrice(text: String, prefix: String): BigDecimal? {
+        val escapedPrefix = Regex.escape(prefix)
+        val pattern = """aria-label=["']$escapedPrefix\s*([0-9]{1,3}(?:\.[0-9]{3})*)\s*reais(?:\s*com\s*([0-9]{1,2})\s*centavos)?["']"""
+        val match = Regex(pattern, setOf(RegexOption.IGNORE_CASE, RegexOption.DOT_MATCHES_ALL)).find(text)
+            ?: return null
+        val reais = match.groupValues.getOrNull(1)
+            ?.replace(".", "")
+            ?: return null
+        val cents = match.groupValues.getOrNull(2)?.takeIf { it.isNotBlank() }
+        val normalizedValue = if (cents == null) reais else "$reais.${cents.padStart(2, '0')}"
+
+        return normalizedValue.toBigDecimalOrNull()
     }
 
     private fun extractDecimal(text: String, patterns: List<String>): BigDecimal? {

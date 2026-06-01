@@ -19,7 +19,7 @@ class OfferMessageBuilder {
         val headlineLine = headline?.let { "🔥 $it 🔥" }
         val footerLine = footer?.let { "_${it}_" }
         val originalPriceLine = item.originalPrice?.let { "💰 de: ${formatCurrency(it)}" }
-        val priceLine = item.price?.let { "✅ por: ${formatCurrency(it)}" }
+        val priceLine = "✅ por: ${item.price?.let(::formatCurrency) ?: "INSERIR VALOR"}"
         val linkUrl = shareUrl ?: item.permalink
 
         return listOfNotNull(
