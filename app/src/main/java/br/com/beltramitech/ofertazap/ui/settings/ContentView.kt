@@ -52,12 +52,14 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import dev.beltramitech.ofertazap.data.AnalyticsTracker
 import dev.beltramitech.ofertazap.ui.components.AdFooterView
 import dev.beltramitech.ofertazap.ui.share.ValueCheckWarning
 
 @Composable
 fun ContentView(
     viewModel: SettingsViewModel,
+    analyticsTracker: AnalyticsTracker,
     onShare: (String) -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -67,7 +69,10 @@ fun ContentView(
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
         bottomBar = {
-            AdFooterView()
+            AdFooterView(
+                screenName = AnalyticsTracker.SCREEN_HOME,
+                analyticsTracker = analyticsTracker
+            )
         }
     ) { paddingValues ->
         Column(
@@ -87,25 +92,39 @@ fun ContentView(
             AffiliateShareSection(
                 uiState = uiState,
                 onLinkChange = viewModel::updateAffiliateLink,
-                onLinkClear = viewModel::clearAffiliateLink,
+                onLinkClear = {
+                    analyticsTracker.logClick("home_clear_affiliate_link", AnalyticsTracker.SCREEN_HOME)
+                    viewModel.clearAffiliateLink()
+                },
                 onPaste = {
+                    analyticsTracker.logClick("home_paste_affiliate_link", AnalyticsTracker.SCREEN_HOME)
                     viewModel.updateAffiliateLink(clipboardManager.getText()?.text.orEmpty())
                 },
                 onPrepare = {
+                    analyticsTracker.logClick("home_prepare_affiliate_message", AnalyticsTracker.SCREEN_HOME)
                     focusManager.clearFocus()
                     viewModel.prepareAffiliateMessage()
                 },
                 onShare = onShare,
-                onCopy = { clipboardManager.setText(AnnotatedString(it)) },
+                onCopy = {
+                    analyticsTracker.logClick("home_copy_affiliate_message", AnalyticsTracker.SCREEN_HOME)
+                    clipboardManager.setText(AnnotatedString(it))
+                },
                 onDone = { focusManager.clearFocus() }
             )
 
             SettingsSection(
                 uiState = uiState,
                 onHeadlineChange = viewModel::updateHeadline,
-                onHeadlineClear = viewModel::clearHeadline,
+                onHeadlineClear = {
+                    analyticsTracker.logClick("home_clear_headline", AnalyticsTracker.SCREEN_HOME)
+                    viewModel.clearHeadline()
+                },
                 onFooterChange = viewModel::updateFooter,
-                onFooterClear = viewModel::clearFooter,
+                onFooterClear = {
+                    analyticsTracker.logClick("home_clear_footer", AnalyticsTracker.SCREEN_HOME)
+                    viewModel.clearFooter()
+                },
                 onDone = { focusManager.clearFocus() }
             )
 
