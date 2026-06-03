@@ -48,6 +48,7 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
+import dev.beltramitech.ofertazap.BuildConfig
 import dev.beltramitech.ofertazap.data.AnalyticsTracker
 import dev.beltramitech.ofertazap.ui.components.AdFooterView
 
@@ -132,35 +133,22 @@ private fun ShareHeader(onClose: () -> Unit) {
         verticalAlignment = Alignment.CenterVertically
     ) {
         Row(
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
-            verticalAlignment = Alignment.CenterVertically
+            horizontalArrangement = Arrangement.spacedBy(6.dp),
+            verticalAlignment = Alignment.Bottom
         ) {
-            Surface(
-                modifier = Modifier.size(44.dp),
-                color = MaterialTheme.colorScheme.primary,
-                shape = CircleShape
-            ) {
-                Icon(
-                    modifier = Modifier.padding(10.dp),
-                    imageVector = Icons.Default.Info,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.onPrimary
-                )
-            }
-
-            Column {
-                Text(
-                    text = "OfertaZap",
-                    color = MaterialTheme.colorScheme.onBackground,
-                    fontWeight = FontWeight.Bold,
-                    style = MaterialTheme.typography.headlineSmall
-                )
-                Text(
-                    text = "Texto gerado",
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    style = MaterialTheme.typography.bodySmall
-                )
-            }
+            Text(
+                text = "OfertaZap",
+                color = MaterialTheme.colorScheme.onBackground,
+                fontWeight = FontWeight.Bold,
+                style = MaterialTheme.typography.headlineSmall
+            )
+            Text(
+                modifier = Modifier.padding(bottom = 3.dp),
+                text = "v${BuildConfig.VERSION_NAME}",
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                fontWeight = FontWeight.SemiBold,
+                style = MaterialTheme.typography.labelSmall
+            )
         }
 
         TextButton(onClick = onClose) {
@@ -336,7 +324,6 @@ private fun ResultContent(
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         ShareHeader(onClose = onClose)
-        OfferSummary()
         EditableMessageCard(
             value = uiState.editableMessage,
             onMessageChange = onMessageChange,

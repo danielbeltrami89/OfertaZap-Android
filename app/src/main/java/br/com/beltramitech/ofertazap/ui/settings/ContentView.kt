@@ -52,6 +52,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import dev.beltramitech.ofertazap.BuildConfig
 import dev.beltramitech.ofertazap.data.AnalyticsTracker
 import dev.beltramitech.ofertazap.ui.components.AdFooterView
 import dev.beltramitech.ofertazap.ui.share.ValueCheckWarning
@@ -84,10 +85,25 @@ fun ContentView(
                 }
                 .padding(paddingValues)
                 .verticalScroll(rememberScrollState())
-                .padding(horizontal = 20.dp, vertical = 26.dp),
-            verticalArrangement = Arrangement.spacedBy(20.dp)
+                .padding(horizontal = 16.dp, vertical = 12.dp),
+            verticalArrangement = Arrangement.spacedBy(14.dp)
         ) {
-            HeaderSummary()
+            AppTitle()
+
+            MessageTemplateCard(
+                uiState = uiState,
+                onHeadlineChange = viewModel::updateHeadline,
+                onHeadlineClear = {
+                    analyticsTracker.logClick("home_clear_headline", AnalyticsTracker.SCREEN_HOME)
+                    viewModel.clearHeadline()
+                },
+                onFooterChange = viewModel::updateFooter,
+                onFooterClear = {
+                    analyticsTracker.logClick("home_clear_footer", AnalyticsTracker.SCREEN_HOME)
+                    viewModel.clearFooter()
+                },
+                onDone = { focusManager.clearFocus() }
+            )
 
             AffiliateShareSection(
                 uiState = uiState,
@@ -112,23 +128,6 @@ fun ContentView(
                 },
                 onDone = { focusManager.clearFocus() }
             )
-
-            SettingsSection(
-                uiState = uiState,
-                onHeadlineChange = viewModel::updateHeadline,
-                onHeadlineClear = {
-                    analyticsTracker.logClick("home_clear_headline", AnalyticsTracker.SCREEN_HOME)
-                    viewModel.clearHeadline()
-                },
-                onFooterChange = viewModel::updateFooter,
-                onFooterClear = {
-                    analyticsTracker.logClick("home_clear_footer", AnalyticsTracker.SCREEN_HOME)
-                    viewModel.clearFooter()
-                },
-                onDone = { focusManager.clearFocus() }
-            )
-
-            PreviewSection(lines = uiState.previewLines)
         }
     }
 }
@@ -275,97 +274,34 @@ private fun AffiliateShareSection(
 }
 
 @Composable
-private fun HeaderSummary() {
-    Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
+private fun AppTitle() {
+    Row(
+        horizontalArrangement = Arrangement.spacedBy(6.dp),
+        verticalAlignment = Alignment.Bottom
+    ) {
         Text(
             text = "OfertaZap",
             color = MaterialTheme.colorScheme.onBackground,
             fontWeight = FontWeight.Bold,
             style = MaterialTheme.typography.displaySmall
         )
-
-        Card(
-            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
-            shape = RoundedCornerShape(24.dp)
-        ) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(18.dp),
-                horizontalArrangement = Arrangement.spacedBy(14.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Surface(
-                    modifier = Modifier.size(44.dp),
-                    color = MaterialTheme.colorScheme.primary,
-                    shape = CircleShape
-                ) {
-                    Icon(
-                        modifier = Modifier.padding(10.dp),
-                        imageVector = Icons.Default.Info,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.onPrimary
-                    )
-                }
-
-                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                    Text(
-                        text = "Mensagem pronta para grupos",
-                        color = MaterialTheme.colorScheme.onSurface,
-                        fontWeight = FontWeight.SemiBold,
-                        style = MaterialTheme.typography.titleMedium
-                    )
-                    Text(
-                        text = "Configure as frases fixas e revise a prévia antes de compartilhar.",
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        style = MaterialTheme.typography.bodySmall
-                    )
-                }
-            }
-        }
+        Text(
+            modifier = Modifier.padding(bottom = 6.dp),
+            text = "v${BuildConfig.VERSION_NAME}",
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            fontWeight = FontWeight.SemiBold,
+            style = MaterialTheme.typography.labelSmall
+        )
     }
 }
 
 @Composable
-private fun SettingsSection(
+private fun MessageTemplateCard(
     uiState: SettingsUiState,
     onHeadlineChange: (String) -> Unit,
     onHeadlineClear: () -> Unit,
     onFooterChange: (String) -> Unit,
     onFooterClear: () -> Unit,
-    onDone: () -> Unit
-) {
-    Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
-        SettingsTextField(
-            title = "Topo da mensagem",
-            value = uiState.headline,
-            placeholder = "Ex: Oferta encontrada",
-            helper = "Vazio não aparece na mensagem.",
-            onValueChange = onHeadlineChange,
-            onClear = onHeadlineClear,
-            onDone = onDone
-        )
-
-        SettingsTextField(
-            title = "Fim da mensagem",
-            value = uiState.footer,
-            placeholder = "Ex: Aproveite antes que acabe",
-            helper = "No WhatsApp, essa frase aparece em itálico.",
-            onValueChange = onFooterChange,
-            onClear = onFooterClear,
-            onDone = onDone
-        )
-    }
-}
-
-@Composable
-private fun SettingsTextField(
-    title: String,
-    value: String,
-    placeholder: String,
-    helper: String,
-    onValueChange: (String) -> Unit,
-    onClear: () -> Unit,
     onDone: () -> Unit
 ) {
     Card(
@@ -376,58 +312,66 @@ private fun SettingsTextField(
             modifier = Modifier.padding(18.dp),
             verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(
-                    modifier = Modifier.size(18.dp),
-                    imageVector = Icons.Default.Info,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.primary
-                )
-                Spacer(modifier = Modifier.width(8.dp))
+            Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
                 Text(
-                    text = title,
+                    text = "Mensagem padrao",
                     color = MaterialTheme.colorScheme.onSurface,
                     fontWeight = FontWeight.SemiBold,
                     style = MaterialTheme.typography.titleMedium
                 )
+                Text(
+                    text = "Toque nas linhas para editar.",
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    style = MaterialTheme.typography.bodySmall
+                )
             }
 
-            OutlinedTextField(
-                modifier = Modifier.fillMaxWidth(),
-                value = value,
-                onValueChange = onValueChange,
-                label = { Text(placeholder) },
-                minLines = 1,
-                maxLines = 2,
-                singleLine = false,
-                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
-                keyboardActions = KeyboardActions(onDone = { onDone() }),
-                colors = OutlinedTextFieldDefaults.colors(
-                    focusedTextColor = MaterialTheme.colorScheme.onSurface,
-                    unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
-                    focusedContainerColor = MaterialTheme.colorScheme.surface,
-                    unfocusedContainerColor = MaterialTheme.colorScheme.surface,
-                    focusedBorderColor = MaterialTheme.colorScheme.primary,
-                    unfocusedBorderColor = Color.Transparent,
-                    focusedLabelColor = MaterialTheme.colorScheme.primary,
-                    unfocusedLabelColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                    cursorColor = MaterialTheme.colorScheme.primary
-                ),
-                shape = RoundedCornerShape(14.dp),
-                trailingIcon = {
-                    if (value.trim().isNotEmpty()) {
-                        IconButton(onClick = onClear) {
-                            Icon(
-                                imageVector = Icons.Default.Close,
-                                contentDescription = "Limpar campo",
-                                tint = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        }
-                    }
-                }
-            )
+            Card(
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+                shape = RoundedCornerShape(18.dp)
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .border(
+                            width = 1.dp,
+                            color = MaterialTheme.colorScheme.surfaceVariant,
+                            shape = RoundedCornerShape(18.dp)
+                        )
+                        .padding(14.dp),
+                    verticalArrangement = Arrangement.spacedBy(10.dp)
+                ) {
+                    InlineTemplateField(
+                        value = uiState.headline,
+                        placeholder = "Oferta encontrada",
+                        prefix = "🔥 ",
+                        suffix = " 🔥",
+                        onValueChange = onHeadlineChange,
+                        onClear = onHeadlineClear,
+                        onDone = onDone
+                    )
 
-            SettingsTip(helper)
+                    TemplatePreviewLine("✨ NOME DO PRODUTO")
+                    TemplatePreviewLine("✅ por: R$ 48,00")
+                    TemplatePreviewLine("🚚 Confira na [plataforma]")
+                    TemplatePreviewLine(
+                        text = "🛒 https://link-da-oferta",
+                        subdued = true
+                    )
+
+                    InlineTemplateField(
+                        value = uiState.footer,
+                        placeholder = "Os valores podem se alterar",
+                        prefix = "_",
+                        suffix = "_",
+                        onValueChange = onFooterChange,
+                        onClear = onFooterClear,
+                        onDone = onDone
+                    )
+                }
+            }
+
+            SettingsTip("Campos vazios nao aparecem na mensagem compartilhada.")
         }
     }
 }
@@ -453,64 +397,82 @@ private fun SettingsTip(text: String) {
 }
 
 @Composable
-private fun PreviewSection(lines: List<String>) {
-    Card(
+private fun InlineTemplateField(
+    value: String,
+    placeholder: String,
+    prefix: String,
+    suffix: String,
+    onValueChange: (String) -> Unit,
+    onClear: () -> Unit,
+    onDone: () -> Unit
+) {
+    OutlinedTextField(
         modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-        shape = RoundedCornerShape(24.dp)
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .border(
-                    width = 1.dp,
-                    color = MaterialTheme.colorScheme.surfaceVariant,
-                    shape = RoundedCornerShape(24.dp)
-                )
-                .padding(18.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = "Prévia",
-                    color = MaterialTheme.colorScheme.onSurface,
-                    fontWeight = FontWeight.SemiBold,
-                    style = MaterialTheme.typography.titleMedium
-                )
-
-                Text(
-                    modifier = Modifier
-                        .clip(CircleShape)
-                        .background(Color(0xFFE8F8EE))
-                        .padding(horizontal = 10.dp, vertical = 5.dp),
-                    text = "WhatsApp",
-                    color = Color(0xFF14813D),
-                    textAlign = TextAlign.Center,
-                    style = MaterialTheme.typography.labelSmall
-                )
-            }
-
-            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                lines.forEach { line ->
+        value = value,
+        onValueChange = onValueChange,
+        placeholder = {
+            Text(
+                text = prefix + placeholder + suffix,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        },
+        minLines = 1,
+        maxLines = 2,
+        singleLine = false,
+        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
+        keyboardActions = KeyboardActions(onDone = { onDone() }),
+        colors = OutlinedTextFieldDefaults.colors(
+            focusedTextColor = MaterialTheme.colorScheme.onSurface,
+            unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
+            focusedContainerColor = MaterialTheme.colorScheme.surface,
+            unfocusedContainerColor = MaterialTheme.colorScheme.surface,
+            focusedBorderColor = MaterialTheme.colorScheme.primary,
+            unfocusedBorderColor = Color.Transparent,
+            cursorColor = MaterialTheme.colorScheme.primary
+        ),
+        shape = RoundedCornerShape(14.dp),
+        leadingIcon = {
+            Text(
+                text = prefix,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                style = MaterialTheme.typography.bodyMedium
+            )
+        },
+        trailingIcon = {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                if (suffix.isNotEmpty()) {
                     Text(
-                        text = line,
-                        color = if (line.startsWith("🛒")) {
-                            MaterialTheme.colorScheme.onSurfaceVariant
-                        } else {
-                            MaterialTheme.colorScheme.onSurface
-                        },
-                        maxLines = if (line.startsWith("🛒")) 1 else Int.MAX_VALUE,
-                        overflow = TextOverflow.Ellipsis,
+                        text = suffix,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                         style = MaterialTheme.typography.bodyMedium
                     )
                 }
+                if (value.trim().isNotEmpty()) {
+                    IconButton(onClick = onClear) {
+                        Icon(
+                            imageVector = Icons.Default.Close,
+                            contentDescription = "Limpar campo",
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
             }
         }
-    }
+    )
+}
+
+@Composable
+private fun TemplatePreviewLine(
+    text: String,
+    subdued: Boolean = false
+) {
+    Text(
+        text = text,
+        color = if (subdued) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.onSurface,
+        maxLines = if (subdued) 1 else Int.MAX_VALUE,
+        overflow = TextOverflow.Ellipsis,
+        style = MaterialTheme.typography.bodyMedium
+    )
 }
 
 @Composable
