@@ -48,11 +48,13 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
+import dev.beltramitech.ofertazap.data.AnalyticsTracker
 import dev.beltramitech.ofertazap.ui.components.AdFooterView
 
 @Composable
 fun ShareScreen(
     viewModel: ShareViewModel,
+    analyticsTracker: AnalyticsTracker,
     onClose: () -> Unit,
     onShare: (String) -> Unit,
     onCopy: (String) -> Unit
@@ -63,7 +65,10 @@ fun ShareScreen(
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
         bottomBar = {
-            AdFooterView()
+            AdFooterView(
+                screenName = AnalyticsTracker.SCREEN_SHARE,
+                analyticsTracker = analyticsTracker
+            )
         }
     ) { paddingValues ->
         Box(

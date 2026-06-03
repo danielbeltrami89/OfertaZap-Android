@@ -8,6 +8,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
+import dev.beltramitech.ofertazap.data.AnalyticsTracker
 import dev.beltramitech.ofertazap.ui.settings.ContentView
 import dev.beltramitech.ofertazap.ui.settings.SettingsViewModel
 import dev.beltramitech.ofertazap.ui.settings.SettingsViewModelFactory
@@ -17,13 +18,18 @@ class MainActivity : ComponentActivity() {
     private val viewModel: SettingsViewModel by viewModels {
         SettingsViewModelFactory(applicationContext)
     }
+    private lateinit var analyticsTracker: AnalyticsTracker
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        analyticsTracker = AnalyticsTracker(applicationContext)
+        analyticsTracker.logScreenView(AnalyticsTracker.SCREEN_HOME)
+
         setContent {
             OfertaZapTheme {
                 ContentView(
                     viewModel = viewModel,
+                    analyticsTracker = analyticsTracker,
                     onShare = ::shareMessage
                 )
             }
@@ -31,6 +37,7 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun shareMessage(message: String) {
+        analyticsTracker.logClick("home_share_message", AnalyticsTracker.SCREEN_HOME)
         copyMessage(message)
         val intent = Intent(Intent.ACTION_SEND).apply {
             type = "text/plain"
@@ -40,6 +47,7 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun copyMessage(message: String) {
+        analyticsTracker.logClick("home_copy_message", AnalyticsTracker.SCREEN_HOME)
         val clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
         clipboard.setPrimaryClip(ClipData.newPlainText("OfertaZap", message))
     }
