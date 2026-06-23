@@ -48,6 +48,7 @@ android {
 
 dependencies {
     val composeBom = platform("androidx.compose:compose-bom:2024.12.01")
+    val fragmentVersion = "1.8.9"
     implementation(composeBom)
     androidTestImplementation(composeBom)
 
@@ -63,6 +64,12 @@ dependencies {
     implementation("com.google.firebase:firebase-analytics")
     implementation("com.google.android.gms:play-services-ads:23.6.0")
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
+
+    constraints {
+        implementation("androidx.fragment:fragment:$fragmentVersion") {
+            because("Google Play flags older transitive Fragment SDK versions.")
+        }
+    }
 
     debugImplementation("androidx.compose.ui:ui-tooling")
 }

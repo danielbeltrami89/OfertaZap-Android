@@ -7,6 +7,7 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import dev.beltramitech.ofertazap.data.AnalyticsTracker
 import dev.beltramitech.ofertazap.ui.settings.ContentView
@@ -21,6 +22,7 @@ class MainActivity : ComponentActivity() {
     private lateinit var analyticsTracker: AnalyticsTracker
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        enableEdgeToEdge()
         super.onCreate(savedInstanceState)
         analyticsTracker = AnalyticsTracker(applicationContext)
         analyticsTracker.logScreenView(AnalyticsTracker.SCREEN_HOME)
