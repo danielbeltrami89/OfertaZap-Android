@@ -22,7 +22,11 @@ android {
             manifestPlaceholders["adMobApplicationId"] = "ca-app-pub-3940256099942544~3347511713"
         }
         release {
-            isMinifyEnabled = false
+            isMinifyEnabled = true
+            isShrinkResources = true
+            ndk {
+                debugSymbolLevel = "SYMBOL_TABLE"
+            }
             manifestPlaceholders["adMobApplicationId"] = "ca-app-pub-9920228067759661~4226417553"
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
