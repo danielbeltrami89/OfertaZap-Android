@@ -13,8 +13,8 @@ android {
         applicationId = "dev.beltramitech.ofertazap"
         minSdk = 26
         targetSdk = 35
-        versionCode = 2
-        versionName = "1.0.1"
+        versionCode = 5
+        versionName = "1.1.1"
     }
 
     buildTypes {
@@ -22,7 +22,11 @@ android {
             manifestPlaceholders["adMobApplicationId"] = "ca-app-pub-3940256099942544~3347511713"
         }
         release {
-            isMinifyEnabled = false
+            isMinifyEnabled = true
+            isShrinkResources = true
+            ndk {
+                debugSymbolLevel = "SYMBOL_TABLE"
+            }
             manifestPlaceholders["adMobApplicationId"] = "ca-app-pub-9920228067759661~4226417553"
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
@@ -48,6 +52,7 @@ android {
 
 dependencies {
     val composeBom = platform("androidx.compose:compose-bom:2024.12.01")
+    val fragmentVersion = "1.8.9"
     implementation(composeBom)
     androidTestImplementation(composeBom)
 
@@ -63,6 +68,12 @@ dependencies {
     implementation("com.google.firebase:firebase-analytics")
     implementation("com.google.android.gms:play-services-ads:23.6.0")
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
+
+    constraints {
+        implementation("androidx.fragment:fragment:$fragmentVersion") {
+            because("Google Play flags older transitive Fragment SDK versions.")
+        }
+    }
 
     debugImplementation("androidx.compose.ui:ui-tooling")
 }
