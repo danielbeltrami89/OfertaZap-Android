@@ -22,6 +22,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.automirrored.filled.Send
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -35,6 +36,7 @@ import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -63,7 +65,10 @@ import dev.beltramitech.ofertazap.ui.share.ValueCheckWarning
 fun ContentView(
     viewModel: SettingsViewModel,
     analyticsTracker: AnalyticsTracker,
-    onShare: (String) -> Unit
+    onShare: (String) -> Unit,
+    showRatingPrompt: Boolean,
+    onRatingPromptDismiss: () -> Unit,
+    onRatingPromptConfirm: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val focusManager = LocalFocusManager.current
@@ -133,6 +138,39 @@ fun ContentView(
             )
         }
     }
+
+    if (showRatingPrompt) {
+        RatingPromptDialog(
+            onDismiss = onRatingPromptDismiss,
+            onConfirm = onRatingPromptConfirm
+        )
+    }
+}
+
+@Composable
+private fun RatingPromptDialog(
+    onDismiss: () -> Unit,
+    onConfirm: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = {
+            Text("Avalie o OfertaZap")
+        },
+        text = {
+            Text("Se o app está ajudando nos testes, deixe sua avaliação na Play Store.")
+        },
+        confirmButton = {
+            Button(onClick = onConfirm) {
+                Text("Avaliar")
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Agora não")
+            }
+        }
+    )
 }
 
 @Composable
