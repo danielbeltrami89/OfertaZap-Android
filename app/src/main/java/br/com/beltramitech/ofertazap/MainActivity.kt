@@ -11,6 +11,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -20,6 +21,7 @@ import dev.beltramitech.ofertazap.ui.settings.ContentView
 import dev.beltramitech.ofertazap.ui.settings.SettingsViewModel
 import dev.beltramitech.ofertazap.ui.settings.SettingsViewModelFactory
 import dev.beltramitech.ofertazap.ui.theme.OfertaZapTheme
+import kotlinx.coroutines.delay
 
 class MainActivity : ComponentActivity() {
     private val viewModel: SettingsViewModel by viewModels {
@@ -35,7 +37,15 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             OfertaZapTheme {
-                var showRatingPrompt by remember { mutableStateOf(shouldShowRatingPrompt()) }
+                var showRatingPrompt by remember { mutableStateOf(false) }
+
+                LaunchedEffect(Unit) {
+                    if (shouldShowRatingPrompt()) {
+                        delay(RATING_PROMPT_DELAY_MILLIS)
+                        analyticsTracker.logImpression("home_rating_prompt", AnalyticsTracker.SCREEN_HOME)
+                        showRatingPrompt = true
+                    }
+                }
 
                 ContentView(
                     viewModel = viewModel,
@@ -107,6 +117,7 @@ class MainActivity : ComponentActivity() {
     }
 
     private companion object {
+        const val RATING_PROMPT_DELAY_MILLIS = 5_000L
         const val RATING_PROMPT_PREFERENCES = "rating_prompt_preferences"
         const val RATING_PROMPT_VERSION_KEY = "last_prompt_version_code"
     }
